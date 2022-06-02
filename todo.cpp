@@ -1,10 +1,9 @@
 #include "todo.h"
+#include <qmap.h>
+#include <QStackedWidget>
+#include <QComboBox>
 #include <QLabel>
-#include <QLineEdit>
-#include <QLayout>
-#include <QPushButton>
-#include <QListWidget>
-#include <QTextEdit>
+#include <QScrollArea>
 
 todo::todo(QWidget *parent)
     : QMainWindow(parent)
@@ -14,32 +13,60 @@ todo::todo(QWidget *parent)
     mainWindow->setGeometry(1000, 1000, 500, 500);
 
     QString labelStyle = "font-weight: bold;" "color: darkgrey;" "font-size: 35px;" "font: Arial;";
-    QLabel *label = new QLabel("todos");
+    label = new QLabel("todos");
     label->setStyleSheet(labelStyle);
     label->setAlignment(Qt::AlignHCenter);
 
     QString searchBoxStyle = "background:white;" "color:grey;";
-    QLineEdit *searchBox = new QLineEdit("What needs to be done?");
+    searchBox = new QLineEdit("What needs to be done?");
     searchBox->setStyleSheet(searchBoxStyle);
 
     QString buttonstyle = ":hover{background:blue;}" ":pressed{background:red;}";
-    QPushButton *button1 = new QPushButton("All");
+    button1 = new QPushButton("All");
     button1->setStyleSheet(buttonstyle);
 
-    QPushButton *button2 = new QPushButton("Active");
+    button2 = new QPushButton("Active");
     button2->setStyleSheet(buttonstyle);
 
-    QPushButton *button3 = new QPushButton("Completed");
+    button3 = new QPushButton("Completed");
     button3->setStyleSheet(buttonstyle);
 
-    QLabel *label2 = new QLabel("task left");
-    QString text = "You have not created a task yet..";
-    QTextEdit *textedit = new QTextEdit();
-    textedit->setText(text);
+    label2 = new QLabel("task left");
+//    QString text = "You have not created a task yet..";
+//    textedit = new QTextEdit();
+//    textedit->setText(text);
 
-    QGridLayout *layout = new QGridLayout ();
-    QHBoxLayout *hlayout = new QHBoxLayout();
-    QVBoxLayout *vlayout = new QVBoxLayout();
+//    QGridLayout *layout = new QGridLayout ();
+    buttonList = new QListWidgetItem();
+    groupBox = new QGroupBox();
+
+    hlayout = new QHBoxLayout();
+    vlayout = new QVBoxLayout();
+
+    QScrollArea *scrollwindows = new QScrollArea;
+    firstlayout = new QVBoxLayout;
+    scrollwindows->setLayout(firstlayout);
+    scrollwindows->setVerticalScrollBarPolicy (Qt::ScrollBarAsNeeded);
+    QVBoxLayout *temp = new QVBoxLayout;
+    temp->addWidget(scrollwindows);
+    secondlayout = new QVBoxLayout;
+    thirdlayout = new QVBoxLayout;
+
+    firstPageWidget = new QWidget;
+    secondPageWidget = new QWidget;
+    thirdPageWidget = new QWidget;
+
+    firstPageWidget->setLayout(temp);
+    QLabel*l = new QLabel("Test");
+    firstlayout->addWidget(l);
+
+    secondPageWidget->setLayout(secondlayout);
+    thirdPageWidget->setLayout(thirdlayout);
+
+    stackedWidget = new QStackedWidget;
+    stackedWidget->addWidget(firstPageWidget);
+    stackedWidget->addWidget(secondPageWidget);
+    stackedWidget->addWidget(thirdPageWidget);
 
     hlayout->addWidget(label2);
     hlayout->addWidget(button1);
@@ -49,10 +76,13 @@ todo::todo(QWidget *parent)
     vlayout->addWidget(label);
     vlayout->addWidget(searchBox);
     vlayout->addLayout(hlayout);
-    vlayout->addWidget(textedit);
-//       layout->addItem(hlayout, 0, 0, 1, 1);
+    vlayout->addWidget(stackedWidget);
 
-//       mainWindow->setLayout(layout);
+    connect (searchBox, SIGNAL(returnPressed()), this, SLOT(getText()));
+    connect (button1, SIGNAL (pressed()), this, SLOT(button1clicked()));
+    connect (button2, SIGNAL (pressed()), this, SLOT(button2clicked()));
+    connect (button3, SIGNAL (pressed()), this, SLOT(button3clicked()));
+
     mainWindow->setLayout(vlayout);
 }
 
@@ -63,5 +93,33 @@ todo::~todo()
 void todo::show()
 {
     mainWindow->show();
+}
+
+void todo::getText()
+{
+    QString text = searchBox->text();
+    insertText(text);
+}
+
+
+void todo::insertText(QString text)
+{
+    QRadioButton *tempBtn = new QRadioButton(text);
+    firstlayout->addWidget(tempBtn);
+}
+
+void todo::button1clicked()
+{
+    stackedWidget->setCurrentIndex(0);
+}
+
+void todo::button2clicked()
+{
+    stackedWidget->setCurrentIndex(1);
+}
+
+void todo::button3clicked()
+{
+    stackedWidget->setCurrentIndex(2);
 }
 
