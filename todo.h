@@ -15,6 +15,7 @@
 #include <QGroupBox>
 #include <QList>
 #include <QStackedWidget>
+#include <QListWidget>
 
 class todo : public QMainWindow
 {
@@ -31,10 +32,6 @@ private:
         QTextEdit *textedit;
         QHBoxLayout *hlayout;
         QVBoxLayout *vlayout;
-        QMap<QRadioButton*, bool> taskList;
-        QListWidgetItem *buttonList;
-        QGroupBox *groupBox;
-        QList<QRadioButton*> currentList;
         QWidget *firstPageWidget;
         QWidget *secondPageWidget;
         QWidget *thirdPageWidget;
@@ -42,7 +39,10 @@ private:
         QVBoxLayout *secondlayout;
         QVBoxLayout *thirdlayout;
         QStackedWidget *stackedWidget;
-        int val = 0;
+        QListWidget * all;
+        QListWidget * active;
+        QListWidget * completed;
+        int count = 0;
 
 public :
     todo(QWidget *parent = nullptr);
@@ -56,5 +56,7 @@ public slots:
     void button1clicked();
     void button2clicked();
     void button3clicked();
+    void markCompleted();
+    void markActive();
 };
 #endif // TODO_H

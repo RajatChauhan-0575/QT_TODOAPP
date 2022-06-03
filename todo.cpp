@@ -31,37 +31,33 @@ todo::todo(QWidget *parent)
     button3 = new QPushButton("Completed");
     button3->setStyleSheet(buttonstyle);
 
-    label2 = new QLabel("task left");
-//    QString text = "You have not created a task yet..";
-//    textedit = new QTextEdit();
-//    textedit->setText(text);
+    label2 = new QLabel(QString::number(count) + " task left");
 
 //    QGridLayout *layout = new QGridLayout ();
-    buttonList = new QListWidgetItem();
-    groupBox = new QGroupBox();
 
     hlayout = new QHBoxLayout();
     vlayout = new QVBoxLayout();
 
-    QScrollArea *scrollwindows = new QScrollArea;
     firstlayout = new QVBoxLayout;
-    scrollwindows->setLayout(firstlayout);
-    scrollwindows->setVerticalScrollBarPolicy (Qt::ScrollBarAsNeeded);
-    QVBoxLayout *temp = new QVBoxLayout;
-    temp->addWidget(scrollwindows);
     secondlayout = new QVBoxLayout;
     thirdlayout = new QVBoxLayout;
+
+    all = new QListWidget;
+    active = new QListWidget;
+    completed = new QListWidget;
 
     firstPageWidget = new QWidget;
     secondPageWidget = new QWidget;
     thirdPageWidget = new QWidget;
 
-    firstPageWidget->setLayout(temp);
-    QLabel*l = new QLabel("Test");
-    firstlayout->addWidget(l);
+    firstPageWidget->setLayout(firstlayout);
+    firstlayout->addWidget(all);
 
     secondPageWidget->setLayout(secondlayout);
+    secondlayout->addWidget(active);
+
     thirdPageWidget->setLayout(thirdlayout);
+    thirdlayout->addWidget(completed);
 
     stackedWidget = new QStackedWidget;
     stackedWidget->addWidget(firstPageWidget);
@@ -82,6 +78,8 @@ todo::todo(QWidget *parent)
     connect (button1, SIGNAL (pressed()), this, SLOT(button1clicked()));
     connect (button2, SIGNAL (pressed()), this, SLOT(button2clicked()));
     connect (button3, SIGNAL (pressed()), this, SLOT(button3clicked()));
+    connect(active,&QListWidget::itemClicked,this,&todo::markCompleted);
+    connect(completed,&QListWidget::itemClicked,this,&todo::markActive);
 
     mainWindow->setLayout(vlayout);
 }
@@ -104,8 +102,16 @@ void todo::getText()
 
 void todo::insertText(QString text)
 {
-    QRadioButton *tempBtn = new QRadioButton(text);
-    firstlayout->addWidget(tempBtn);
+    QListWidgetItem *temp = new QListWidgetItem(text);
+    QListWidgetItem *temp1 = new QListWidgetItem(text);
+    temp->setFlags(Qt::NoItemFlags);
+    temp->setTextColor(Qt::black);
+    temp->setCheckState(Qt::Unchecked);
+    temp1->setCheckState(Qt::Unchecked);
+    all->addItem(temp);
+    active->addItem(temp1);
+    count++;
+    label2->setText(QString::number(count) + " task left");
 }
 
 void todo::button1clicked()
@@ -123,3 +129,28 @@ void todo::button3clicked()
     stackedWidget->setCurrentIndex(2);
 }
 
+void todo::markCompleted()
+{
+     int row = active->currentRow();
+     auto item = active->takeItem(row);
+     item->setCheckState(Qt::Checked);
+     QListWidgetItem * item1 = all->findItems(item->text(), Qt::MatchExactly)[0];
+     item1->setCheckState(Qt::Checked);
+     all->addItem(item1);
+     completed->addItem(item);
+     count--;
+     label2->setText(QString::number(count) + " task left");
+}
+
+void todo::markActive()
+{
+    int row = completed->currentRow();
+    auto item = completed->takeItem(row);
+    item->setCheckState(Qt::Unchecked);
+    QListWidgetItem * item1 = all->findItems(item->text(), Qt::MatchExactly)[0];
+    item1->setCheckState(Qt::Unchecked);
+    all->addItem(item1);
+    active->addItem(item);
+    count++;
+    label2->setText(QString::number(count) + " task left");
+}
