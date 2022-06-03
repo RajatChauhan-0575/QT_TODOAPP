@@ -18,7 +18,8 @@ todo::todo(QWidget *parent)
     label->setAlignment(Qt::AlignHCenter);
 
     QString searchBoxStyle = "background:white;" "color:grey;";
-    searchBox = new QLineEdit("What needs to be done?");
+    searchBox = new QLineEdit();
+    searchBox->setPlaceholderText("What needs to be done?");
     searchBox->setStyleSheet(searchBoxStyle);
 
     QString buttonstyle = ":hover{background:blue;}" ":pressed{background:red;}";
