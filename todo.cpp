@@ -4,6 +4,7 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QScrollArea>
+#include <windows.h>
 
 todo::todo(QWidget *parent)
     : QMainWindow(parent)
@@ -17,7 +18,7 @@ todo::todo(QWidget *parent)
     label->setStyleSheet(labelStyle);
     label->setAlignment(Qt::AlignHCenter);
 
-    QString searchBoxStyle = "background:white;" "color:grey;";
+    QString searchBoxStyle = "background:white;" "color:grey;"; // change name
     searchBox = new QLineEdit();
     searchBox->setPlaceholderText("What needs to be done?");
     searchBox->setStyleSheet(searchBoxStyle);
@@ -33,7 +34,9 @@ todo::todo(QWidget *parent)
     button3->setStyleSheet(buttonstyle);
 
     label2 = new QLabel(QString::number(count) + " task left");
-
+    pixmap.load("C:/Personal/Learnings/QT/QT_TODOAPP/icons/icons8-edit-30.png");
+     //pixmap.load("C:/Personal/Learnings/QT/QT_TODOAPP/icons/icons8-edit.gif");//
+    ButtonIcon.addPixmap(pixmap);
 //    QGridLayout *layout = new QGridLayout ();
 
     hlayout = new QHBoxLayout();
@@ -50,6 +53,10 @@ todo::todo(QWidget *parent)
     firstPageWidget = new QWidget;
     secondPageWidget = new QWidget;
     thirdPageWidget = new QWidget;
+
+    widgetmap.insert (0, all);
+    widgetmap.insert (1, active);
+    widgetmap.insert (2, completed);
 
     firstPageWidget->setLayout(firstlayout);
     firstlayout->addWidget(all);
@@ -103,16 +110,41 @@ void todo::getText()
 
 void todo::insertText(QString text)
 {
-    QListWidgetItem *temp = new QListWidgetItem(text);
-    QListWidgetItem *temp1 = new QListWidgetItem(text);
-    temp->setFlags(Qt::NoItemFlags);
-    temp->setTextColor(Qt::black);
-    temp->setCheckState(Qt::Unchecked);
-    temp1->setCheckState(Qt::Unchecked);
-    all->addItem(temp);
-    active->addItem(temp1);
+    QListWidgetItem *wItemAll = new QListWidgetItem(text);
+    wItemAll->setFlags(Qt::NoItemFlags);
+    wItemAll->setTextColor(Qt::black);
+    wItemAll->setCheckState(Qt::Unchecked);
+    all->addItem(wItemAll);
+
+    QListWidgetItem *wItemAct = new QListWidgetItem();
+    QHBoxLayout *tmpLayout = new QHBoxLayout();
+    QRadioButton *tmpRbtn = new QRadioButton();
+    QLabel *tmpLabel = new QLabel(text);
+    QPushButton *tmpbtn = new QPushButton();
+    tmpbtn->setIcon(ButtonIcon);
+    QWidget *tmpWgt = new QWidget();
+    tmpLayout->addWidget(tmpRbtn);
+    tmpLayout->addWidget(tmpLabel);
+    tmpLayout->addWidget(tmpbtn);
+    tmpLayout->setSizeConstraint(QLayout::SetMaximumSize);
+    tmpWgt->setLayout(tmpLayout);
+    wItemAct->setSizeHint(tmpWgt->sizeHint());
+    wItemAct->setFlags(Qt::NoItemFlags);
+    btnwgtitm.insert(tmpbtn, wItemAct);
+    wgtimlay.insert(wItemAct, tmpLayout);
+    rdwgtitm.insert(tmpRbtn, wItemAct);
+    rdwgt.insert(tmpRbtn, tmpWgt);
+    active->addItem(wItemAct);
+    active->setItemWidget(wItemAct, tmpWgt);
+    connect (tmpbtn, &QPushButton::pressed, this, &todo::editTask);
+    connect (tmpRbtn, &QRadioButton::clicked, this, &todo::markCompleted);
+
     count++;
     label2->setText(QString::number(count) + " task left");
+    QPushButton* btn = tmpLayout->findChild<QPushButton*> (QString("Edit"));
+    auto idx = tmpLayout->indexOf(btn);
+    qDebug() << "idx of Edit " << idx;
+
 }
 
 void todo::button1clicked()
@@ -132,15 +164,18 @@ void todo::button3clicked()
 
 void todo::markCompleted()
 {
-     int row = active->currentRow();
-     auto item = active->takeItem(row);
-     item->setCheckState(Qt::Checked);
-     QListWidgetItem * item1 = all->findItems(item->text(), Qt::MatchExactly)[0];
-     item1->setCheckState(Qt::Checked);
-     all->addItem(item1);
-     completed->addItem(item);
-     count--;
-     label2->setText(QString::number(count) + " task left");
+    auto rdbtn = dynamic_cast<QRadioButton *> (sender());
+    QListWidgetItem * wdgtitem = rdwgtitm.value(rdbtn);
+    QWidget *wgt = rdwgt.value(rdbtn);
+
+
+    int row = active->row(wdgtitem);
+    auto item = active->takeItem(row);
+
+    completed->addItem(item);
+
+    count--;
+    label2->setText(QString::number(count) + " task left");
 }
 
 void todo::markActive()
@@ -154,4 +189,78 @@ void todo::markActive()
     active->addItem(item);
     count++;
     label2->setText(QString::number(count) + " task left");
+}
+
+void todo::editTask()
+{
+    auto btn = dynamic_cast<QPushButton *> (sender());
+    QListWidgetItem * wdgtitem = btnwgtitm.value(btn);
+    QHBoxLayout * layout = wgtimlay.value(wdgtitem);
+    QPushButton *btnwgt = dynamic_cast <QPushButton *> (layout->itemAt(2)->widget());
+    QLabel *wgt = dynamic_cast <QLabel *> (layout->itemAt(1)->widget());
+    QString txt = wgt->text();
+
+    QLineEdit *temp = new QLineEdit(txt);
+    QPushButton *delbtn = new QPushButton("Delete");
+    delbtnwgtitm.insert(delbtn, wdgtitem);
+
+    connect (delbtn, &QPushButton::pressed, this, &todo::deleteTask);
+    txtlay.insert(temp, layout);
+    connect (temp, &QLineEdit::returnPressed, this, &todo::saveeditTask);
+    btnwgtitm.remove(btn);
+
+
+    auto idx = layout->indexOf(wgt);
+    layout->insertWidget(idx, temp);
+    layout->removeWidget(wgt);
+    wgt->deleteLater();
+
+    idx = layout->indexOf(btnwgt);
+    layout->insertWidget(idx, delbtn);
+    qDebug() << "button idx" << idx;
+    layout->removeWidget(btnwgt);
+    btnwgt->deleteLater();
+
+    qDebug () << "Count " << layout->count();
+}
+
+void todo::deleteTask()
+{
+    auto btn = dynamic_cast<QPushButton *> (sender());
+    QListWidgetItem * wdgtitem = delbtnwgtitm.value(btn);
+    auto idx = stackedWidget->currentIndex();
+    qDebug() << "Index" <<idx;
+    auto lstwgt = widgetmap.value(idx);
+    auto rownum = lstwgt->row(wdgtitem);
+    qDebug() << "row" <<rownum;
+    lstwgt->takeItem(rownum);
+
+    count--;
+    label2->setText(QString::number(count) + " task left");
+}
+
+void todo::saveeditTask()
+{
+    auto lineedit = dynamic_cast<QLineEdit *> (sender());
+    qDebug() << "inside saveeditTask";
+    QHBoxLayout * layout = txtlay.value(lineedit);
+    QLabel *label = new QLabel(lineedit->text());
+    auto idx = layout->indexOf(lineedit);
+    layout->insertWidget(idx, label);
+    layout->removeWidget(lineedit);
+    txtlay.remove (lineedit);
+    lineedit->deleteLater();
+
+    qDebug () << "Cound inside saveditTask "<< layout->count();
+    idx = 2; // get this value later
+    auto item = layout->itemAt(idx)->widget();
+    QPushButton * delbtn = dynamic_cast <QPushButton *> (item);
+    QPushButton *edtbtn = new QPushButton();
+    edtbtn->setIcon(ButtonIcon);
+    layout->insertWidget(idx, edtbtn);
+    layout->removeWidget(item);
+    btnwgtitm.insert(edtbtn, delbtnwgtitm.value(delbtn));
+    connect (edtbtn, &QPushButton::pressed, this, &todo::editTask);
+    delbtnwgtitm.remove(delbtn);
+    item->deleteLater();
 }

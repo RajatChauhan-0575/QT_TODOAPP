@@ -16,6 +16,8 @@
 #include <QList>
 #include <QStackedWidget>
 #include <QListWidget>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
 
 class todo : public QMainWindow
 {
@@ -42,6 +44,16 @@ private:
         QListWidget * all;
         QListWidget * active;
         QListWidget * completed;
+        QList<QPushButton *> btnList;
+        QMap<QPushButton *, QListWidgetItem *> btnwgtitm;
+        QMap<QPushButton *, QListWidgetItem *> delbtnwgtitm;
+        QMap<QListWidgetItem *, QHBoxLayout *> wgtimlay;
+        QMap<QLineEdit *, QHBoxLayout *> txtlay;
+        QMap<int, QListWidget *> widgetmap;
+        QMap<QRadioButton *, QListWidgetItem *> rdwgtitm;
+        QMap<QRadioButton *, QWidget*> rdwgt;
+        QPixmap pixmap;
+        QIcon ButtonIcon;
         int count = 0;
 
 public :
@@ -58,5 +70,8 @@ public slots:
     void button3clicked();
     void markCompleted();
     void markActive();
+    void editTask();
+    void deleteTask();
+    void saveeditTask();
 };
 #endif // TODO_H
