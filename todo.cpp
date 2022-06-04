@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QScrollArea>
 #include <windows.h>
+#include "styles.h"
 
 todo::todo(QWidget *parent)
     : QMainWindow(parent)
@@ -13,31 +14,27 @@ todo::todo(QWidget *parent)
     mainWindow->setWindowTitle("ToDo App");
     mainWindow->setGeometry(750, 750, 750, 750);
 
-    QString labelStyle = "font-weight: bold;" "color: darkgrey;" "font-size: 35px;" "font: Arial;";
-    label = new QLabel("todos");
-    label->setStyleSheet(labelStyle);
-    label->setAlignment(Qt::AlignHCenter);
+    headerlabel = new QLabel("todos");
+    headerlabel->setStyleSheet(labelStyle);
+    headerlabel->setAlignment(Qt::AlignHCenter);
 
-    QString searchBoxStyle = "background:white;" "color:grey;"; // change name
-    searchBox = new QLineEdit();
-    searchBox->setPlaceholderText("What needs to be done?");
-    searchBox->setStyleSheet(searchBoxStyle);
 
-    QString buttonstyle = ":hover{background:blue;}" ":pressed{background:red;}";
-    button1 = new QPushButton("All");
-    button1->setStyleSheet(buttonstyle);
+    newTaskEdit = new QLineEdit();
+    newTaskEdit->setPlaceholderText("What needs to be done?");
+    newTaskEdit->setStyleSheet(newTaskEditStyle);
 
-    button2 = new QPushButton("Active");
-    button2->setStyleSheet(buttonstyle);
+    allbutton = new QPushButton("All");
+    allbutton->setStyleSheet(buttonstyle);
 
-    button3 = new QPushButton("Completed");
-    button3->setStyleSheet(buttonstyle);
+    activebutton = new QPushButton("Active");
+    activebutton->setStyleSheet(buttonstyle);
 
-    label2 = new QLabel(QString::number(count) + " task left");
+    completedbutton = new QPushButton("Completed");
+    completedbutton->setStyleSheet(buttonstyle);
+
+    taskLeftlabel = new QLabel(QString::number(count) + " task left");
     pixmap.load("C:/Personal/Learnings/QT/QT_TODOAPP/icons/icons8-edit-30.png");
-     //pixmap.load("C:/Personal/Learnings/QT/QT_TODOAPP/icons/icons8-edit.gif");//
     ButtonIcon.addPixmap(pixmap);
-//    QGridLayout *layout = new QGridLayout ();
 
     hlayout = new QHBoxLayout();
     vlayout = new QVBoxLayout();
@@ -72,22 +69,20 @@ todo::todo(QWidget *parent)
     stackedWidget->addWidget(secondPageWidget);
     stackedWidget->addWidget(thirdPageWidget);
 
-    hlayout->addWidget(label2);
-    hlayout->addWidget(button1);
-    hlayout->addWidget(button2);
-    hlayout->addWidget(button3);
+    hlayout->addWidget(taskLeftlabel);
+    hlayout->addWidget(allbutton);
+    hlayout->addWidget(activebutton);
+    hlayout->addWidget(completedbutton);
 
-    vlayout->addWidget(label);
-    vlayout->addWidget(searchBox);
+    vlayout->addWidget(headerlabel);
+    vlayout->addWidget(newTaskEdit);
     vlayout->addLayout(hlayout);
     vlayout->addWidget(stackedWidget);
 
-    connect (searchBox, SIGNAL(returnPressed()), this, SLOT(getText()));
-    connect (button1, SIGNAL (pressed()), this, SLOT(button1clicked()));
-    connect (button2, SIGNAL (pressed()), this, SLOT(button2clicked()));
-    connect (button3, SIGNAL (pressed()), this, SLOT(button3clicked()));
-//    connect(active,&QListWidget::itemClicked,this,&todo::markCompleted);
-//    connect(completed,&QListWidget::itemClicked,this,&todo::markActive);
+    connect (newTaskEdit, SIGNAL(returnPressed()), this, SLOT(getText()));
+    connect (allbutton, SIGNAL (pressed()), this, SLOT(button1clicked()));
+    connect (activebutton, SIGNAL (pressed()), this, SLOT(button2clicked()));
+    connect (completedbutton, SIGNAL (pressed()), this, SLOT(button3clicked()));
 
     mainWindow->setLayout(vlayout);
 }
@@ -103,8 +98,13 @@ void todo::show()
 
 void todo::getText()
 {
-    QString text = searchBox->text();
+    QString text = newTaskEdit->text();
     insertTask(text);
+}
+
+void todo::updateCount(int count)
+{
+      taskLeftlabel->setText(QString::number(count) + " task left");
 }
 
 void todo::button1clicked()
@@ -126,7 +126,6 @@ void todo::insertTask(QString text)
 {
     QListWidgetItem *wItemAll = new QListWidgetItem(text);
     wItemAll->setFlags(Qt::NoItemFlags);
-    wItemAll->setTextColor(Qt::black);
     wItemAll->setCheckState(Qt::Unchecked);
     all->addItem(wItemAll);
 
@@ -154,11 +153,10 @@ void todo::insertTask(QString text)
     connect (tmpRbtn, &QRadioButton::clicked, this, &todo::markCompleted);
 
     count++;
-    label2->setText(QString::number(count) + " task left");
+    updateCount(count);
     QPushButton* btn = tmpLayout->findChild<QPushButton*> (QString("Edit"));
     auto idx = tmpLayout->indexOf(btn);
     qDebug() << "idx of Edit " << idx;
-
 }
 
 void todo::markCompleted()
@@ -175,7 +173,7 @@ void todo::markCompleted()
 //    completed->
 
     count--;
-    label2->setText(QString::number(count) + " task left");
+    updateCount(count);
 }
 
 void todo::markActive()
@@ -188,7 +186,7 @@ void todo::markActive()
     all->addItem(item1);
     active->addItem(item);
     count++;
-    label2->setText(QString::number(count) + " task left");
+    updateCount(count);
 }
 
 void todo::editTask()
@@ -236,7 +234,7 @@ void todo::deleteTask()
     lstwgt->takeItem(rownum);
 
     count--;
-    label2->setText(QString::number(count) + " task left");
+    updateCount(count);
 }
 
 void todo::saveeditTask()

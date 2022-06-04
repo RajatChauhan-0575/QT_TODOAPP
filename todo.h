@@ -26,12 +26,13 @@ class todo : public QMainWindow
 
 private:
         QWidget *mainWindow;
-        QLabel *label;
-        QLineEdit *searchBox;
-        QPushButton *button1;
-        QPushButton *button2;
-        QPushButton *button3;
-        QLabel *label2;
+        QLabel *headerlabel;
+        QLineEdit *newTaskEdit;
+        QPushButton *allbutton;
+        QPushButton *activebutton;
+        QPushButton *completedbutton;
+
+        QLabel *taskLeftlabel;
         QTextEdit *textedit;
         QHBoxLayout *hlayout;
         QVBoxLayout *vlayout;
@@ -62,6 +63,7 @@ public :
     ~todo();
     void show();
     void insertTask(QString);
+    void updateCount(int);
 
 public slots:
     void getText();

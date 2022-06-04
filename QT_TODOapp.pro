@@ -20,6 +20,7 @@ SOURCES += \
     todo.cpp
 
 HEADERS += \
+    styles.h \
     todo.h
 
 # Default rules for deployment.
