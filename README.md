@@ -3,4 +3,4 @@ TODO App using QT
 
 Screenshots
 
-https://github.com/RajatChauhan-0575/QT_TODOAPP/blob/main/screenshot/active.PNG
+![Alt text](https://github.com/RajatChauhan-0575/QT_TODOAPP/blob/main/screenshot/active.PNG?raw=true "Active screen")
