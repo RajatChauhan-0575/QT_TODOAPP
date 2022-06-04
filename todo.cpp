@@ -11,7 +11,7 @@ todo::todo(QWidget *parent)
 {
     mainWindow = new QWidget();
     mainWindow->setWindowTitle("ToDo App");
-    mainWindow->setGeometry(1000, 1000, 500, 500);
+    mainWindow->setGeometry(750, 750, 750, 750);
 
     QString labelStyle = "font-weight: bold;" "color: darkgrey;" "font-size: 35px;" "font: Arial;";
     label = new QLabel("todos");
@@ -86,8 +86,8 @@ todo::todo(QWidget *parent)
     connect (button1, SIGNAL (pressed()), this, SLOT(button1clicked()));
     connect (button2, SIGNAL (pressed()), this, SLOT(button2clicked()));
     connect (button3, SIGNAL (pressed()), this, SLOT(button3clicked()));
-    connect(active,&QListWidget::itemClicked,this,&todo::markCompleted);
-    connect(completed,&QListWidget::itemClicked,this,&todo::markActive);
+//    connect(active,&QListWidget::itemClicked,this,&todo::markCompleted);
+//    connect(completed,&QListWidget::itemClicked,this,&todo::markActive);
 
     mainWindow->setLayout(vlayout);
 }
@@ -104,11 +104,25 @@ void todo::show()
 void todo::getText()
 {
     QString text = searchBox->text();
-    insertText(text);
+    insertTask(text);
 }
 
+void todo::button1clicked()
+{
+    stackedWidget->setCurrentIndex(0);
+}
 
-void todo::insertText(QString text)
+void todo::button2clicked()
+{
+    stackedWidget->setCurrentIndex(1);
+}
+
+void todo::button3clicked()
+{
+    stackedWidget->setCurrentIndex(2);
+}
+
+void todo::insertTask(QString text)
 {
     QListWidgetItem *wItemAll = new QListWidgetItem(text);
     wItemAll->setFlags(Qt::NoItemFlags);
@@ -118,7 +132,7 @@ void todo::insertText(QString text)
 
     QListWidgetItem *wItemAct = new QListWidgetItem();
     QHBoxLayout *tmpLayout = new QHBoxLayout();
-    QRadioButton *tmpRbtn = new QRadioButton();
+    QCheckBox *tmpRbtn = new QCheckBox();
     QLabel *tmpLabel = new QLabel(text);
     QPushButton *tmpbtn = new QPushButton();
     tmpbtn->setIcon(ButtonIcon);
@@ -147,32 +161,18 @@ void todo::insertText(QString text)
 
 }
 
-void todo::button1clicked()
-{
-    stackedWidget->setCurrentIndex(0);
-}
-
-void todo::button2clicked()
-{
-    stackedWidget->setCurrentIndex(1);
-}
-
-void todo::button3clicked()
-{
-    stackedWidget->setCurrentIndex(2);
-}
-
 void todo::markCompleted()
 {
-    auto rdbtn = dynamic_cast<QRadioButton *> (sender());
+    auto rdbtn = dynamic_cast<QCheckBox *> (sender());
     QListWidgetItem * wdgtitem = rdwgtitm.value(rdbtn);
-    QWidget *wgt = rdwgt.value(rdbtn);
-
-
+    rdwgt.value(rdbtn)->show();
     int row = active->row(wdgtitem);
-    auto item = active->takeItem(row);
+    qDebug () << "row : " << row;
+    QListWidgetItem * item = active->takeItem(row);
 
     completed->addItem(item);
+//    completed->setItemWidget(item, wgt);
+//    completed->
 
     count--;
     label2->setText(QString::number(count) + " task left");
@@ -251,7 +251,7 @@ void todo::saveeditTask()
     txtlay.remove (lineedit);
     lineedit->deleteLater();
 
-    qDebug () << "Cound inside saveditTask "<< layout->count();
+    qDebug () << "Count inside saveditTask "<< layout->count();
     idx = 2; // get this value later
     auto item = layout->itemAt(idx)->widget();
     QPushButton * delbtn = dynamic_cast <QPushButton *> (item);

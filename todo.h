@@ -18,6 +18,7 @@
 #include <QListWidget>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
+#include <QCheckBox>
 
 class todo : public QMainWindow
 {
@@ -50,8 +51,8 @@ private:
         QMap<QListWidgetItem *, QHBoxLayout *> wgtimlay;
         QMap<QLineEdit *, QHBoxLayout *> txtlay;
         QMap<int, QListWidget *> widgetmap;
-        QMap<QRadioButton *, QListWidgetItem *> rdwgtitm;
-        QMap<QRadioButton *, QWidget*> rdwgt;
+        QMap<QCheckBox *, QListWidgetItem *> rdwgtitm;
+        QMap<QCheckBox *, QWidget*> rdwgt;
         QPixmap pixmap;
         QIcon ButtonIcon;
         int count = 0;
@@ -60,8 +61,7 @@ public :
     todo(QWidget *parent = nullptr);
     ~todo();
     void show();
-    void showText();
-    void insertText(QString);
+    void insertTask(QString);
 
 public slots:
     void getText();
